@@ -76,10 +76,10 @@ namespace Match3Game
                 }
             }
 
-           
+
             Destroy(gems[4, 4].gameObject);
 
-            SpawnNewGem(4,4, GemType.OBSTACLE);
+            SpawnNewGem(4, 4, GemType.OBSTACLE);
 
 
             Destroy(gems[3, 4].gameObject);
@@ -111,8 +111,8 @@ namespace Match3Game
             for (int y = yDim - 2; y >= 0; y--)
             {
                 for (int loopX = 0; loopX < xDim; loopX++)
-                {   
-                    int x= loopX;
+                {
+                    int x = loopX;
 
                     if (inverse)
                     {
@@ -135,7 +135,7 @@ namespace Match3Game
                         }
                         else
                         {
-                            for(int diag = -1; diag <= 1; diag++)
+                            for (int diag = -1; diag <= 1; diag++)
                             {
                                 if (diag != 0)
                                 {
@@ -146,23 +146,23 @@ namespace Match3Game
                                         diagX = x - diag;
                                     }
 
-                                    if(diagX>= 0 && diagX < xDim)
+                                    if (diagX >= 0 && diagX < xDim)
                                     {
                                         Gem diagonalGem = gems[diagX, y + 1];
 
-                                        if(diagonalGem.GemType == GemType.EMPTY)
+                                        if (diagonalGem.GemType == GemType.EMPTY)
                                         {
                                             bool hasGemAbove = true;
 
-                                            for( int aboveY = y; aboveY>=0; aboveY--)
+                                            for (int aboveY = y; aboveY >= 0; aboveY--)
                                             {
-                                                Gem gemAbove = gems[diagX,aboveY];
+                                                Gem gemAbove = gems[diagX, aboveY];
 
                                                 if (gemAbove.IsMovable())
                                                 {
                                                     break;
                                                 }
-                                                else if(!gemAbove.IsMovable() && gemAbove.GemType != GemType.EMPTY)
+                                                else if (!gemAbove.IsMovable() && gemAbove.GemType != GemType.EMPTY)
                                                 {
                                                     hasGemAbove = false;
                                                     break;
@@ -172,9 +172,9 @@ namespace Match3Game
                                             if (!hasGemAbove)
                                             {
                                                 Destroy(diagonalGem.gameObject);
-                                                gem.MovableComponent.Move(diagX,y+1,fillTime);
-                                                gems[diagX,y+1] = gem;
-                                                SpawnNewGem(x,y,GemType.EMPTY);
+                                                gem.MovableComponent.Move(diagX, y + 1, fillTime);
+                                                gems[diagX, y + 1] = gem;
+                                                SpawnNewGem(x, y, GemType.EMPTY);
                                                 movedGem = true;
                                                 break;
                                             }
@@ -235,24 +235,33 @@ namespace Match3Game
 
         public void SwapGems(Gem gem1, Gem gem2)
         {
-            if (gem1.IsMovable() && gem2.IsMovable()) 
+            if (gem1.IsMovable() && gem2.IsMovable())
             {
                 gems[gem1.X, gem1.Y] = gem2;
                 gems[gem2.X, gem2.Y] = gem1;
-                
-                int gem1X = gem1.X;
-                int gem1Y = gem1.Y;
 
-                gem1.MovableComponent.Move(gem2.X, gem2.Y,fillTime);
-                gem2.MovableComponent.Move(gem1X, gem1Y,fillTime);
+                if (GetMatch(gem1, gem2.X, gem2.Y) != null || GetMatch(gem2, gem1.X, gem2.Y) != null)
+                {
+                    int gem1X = gem1.X;
+                    int gem1Y = gem1.Y;
+
+                    gem1.MovableComponent.Move(gem2.X, gem2.Y, fillTime);
+                    gem2.MovableComponent.Move(gem1X, gem1Y, fillTime);
+                }
+                else
+                {
+                    gems[gem1.X, gem1.Y] = gem1;
+                    gems[gem2.X, gem2.Y] = gem2;
+                }
+
 
             }
         }
-
+        #region Click
         public void PressGem(Gem gem)
         {
-             pressedGem = gem;
-       
+            pressedGem = gem;
+
         }
 
         public void EnterGem(Gem gem)
@@ -267,7 +276,189 @@ namespace Match3Game
                 SwapGems(pressedGem, enteredGem);
             }
         }
+        #endregion
+
+        #region Match Gems
+
+        public List<Gem> GetMatch(Gem gem, int newX, int newY)
+        {
+            if (gem.IsColored())
+            {
+                ColorGem.ColorType color = gem.ColorComponent.Color;
+                List<Gem> horizontalGems = new List<Gem>();
+                List<Gem> verticalGems = new List<Gem>();
+                List<Gem> matchingGems = new List<Gem>();
+
+                horizontalGems.Add(gem);
+                for (int dir = 0; dir <= 1; dir++)
+                {
+                    for (int xOffset = 1; xOffset < xDim; xOffset++)
+                    {
+                        int x;
+                        if (dir == 0) // Left
+                        {
+                            x = newX - xOffset;
+                        }
+                        else // Right
+                        {
+                            x = newX + xOffset;
+                        }
+
+                        if (x < 0 || x >= xDim) { break; }
 
 
+                        if (gems[x, newY].IsColored() && gems[x, newY].ColorComponent.Color == color)
+                        {
+                            horizontalGems.Add(gems[x, newY]);
+                        }
+                        else { break; }
+
+
+                    }
+                }
+
+                if (horizontalGems.Count >= 3)
+                {
+                    for (int i = 0; i < horizontalGems.Count; i++)
+                    {
+                        matchingGems.Add(horizontalGems[i]);
+
+                    }
+                }
+
+                //Traverse vertically if we found a match (for T and L shape)
+                if (horizontalGems.Count >= 3)
+                {
+                    for (int i = 0; i < horizontalGems.Count; i++)
+                    {
+                        for (int dir = 0; dir <= 1; dir++)
+                        {
+                            for (int yOffset = 1; yOffset < yDim; yOffset++)
+                            {
+                                int y;
+                                if (dir == 0)
+                                { y = newY - yOffset; }
+                                else { y = newY + yOffset; }
+
+                                if (y < 0 || y >= yDim) { break; }
+
+                                if (gems[horizontalGems[i].X, y].IsColored() && gems[horizontalGems[i].X, y].ColorComponent.Color == color)
+                                {
+                                    verticalGems.Add(gems[horizontalGems[i].X, y]);
+                                }
+                                else { break; }
+                            }
+                        }
+
+                        if (verticalGems.Count < 2)
+                        {
+                            verticalGems.Clear();
+                        }
+                        else
+                        {
+                            for (int j = 0; j < verticalGems.Count; j++)
+                            {
+                                matchingGems.Add(verticalGems[j]);
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (matchingGems.Count >= 3)
+                {
+                    return matchingGems;
+                }
+
+                horizontalGems.Clear();
+                verticalGems.Clear();
+                // Check vertically
+                verticalGems.Add(gem);
+                for (int dir = 0; dir <= 1; dir++)
+                {
+                    for (int yOffset = 1; yOffset < yDim; yOffset++)
+                    {
+                        int y;
+                        if (dir == 0) // Up
+                        {
+                            y = newY - yOffset;
+                        }
+                        else // Down
+                        {
+                            y = newY + yOffset;
+                        }
+
+                        if (y < 0 || y >= yDim) { break; }
+
+
+                        if (gems[newX, y].IsColored() && gems[newX, y].ColorComponent.Color == color)
+                        {
+                            verticalGems.Add(gems[newX, y]);
+                        }
+                        else { break; }
+
+
+                    }
+                }
+
+                if (verticalGems.Count >= 3)
+                {
+                    for (int i = 0; i < verticalGems.Count; i++)
+                    {
+                        matchingGems.Add(verticalGems[i]);
+
+                    }
+                }
+
+
+                //Traverse horizontally if we found a match (for T and L shape)
+                if (verticalGems.Count >= 3)
+                {
+                    for (int i = 0; i < verticalGems.Count; i++)
+                    {
+                        for (int dir = 0; dir <= 1; dir++)
+                        {
+                            for (int xOffset = 1; xOffset < xDim; xOffset++)
+                            {
+                                int x;
+                                if (dir == 0) // Left
+                                { x = newX - xOffset; }
+                                else { x = newX + xOffset; } // Right
+
+                                if (x < 0 || x >= xDim) { break; }
+
+                                if (gems[x,verticalGems[i].Y].IsColored() && gems[x,verticalGems[i].Y].ColorComponent.Color == color)
+                                {
+                                    horizontalGems.Add(gems[x,verticalGems[i].Y]);
+                                }
+                                else { break; }
+                            }
+                        }
+
+                        if (horizontalGems.Count < 2)
+                        {
+                            horizontalGems.Clear();
+                        }
+                        else
+                        {
+                            for (int j = 0; j < horizontalGems.Count; j++)
+                            {
+                                matchingGems.Add(horizontalGems[j]);
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (matchingGems.Count >= 3)
+                {
+                    return matchingGems;
+                }
+            }
+
+            return null;
+        }
+
+        #endregion
     }
 }
