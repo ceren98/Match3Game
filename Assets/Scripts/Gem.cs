@@ -80,5 +80,23 @@ namespace Match3Game
         {
             return colorComponent!=null;
         }
+
+        private void OnMouseEnter()
+        {
+            grid.EnterGem(this);
+        }
+
+        private void OnMouseDown()
+        {
+            grid.PressGem(this);
+        }
+
+        private void OnMouseUp()
+        {
+            grid.ReleaseGem();
+        }
+
+    
+
     }
 }

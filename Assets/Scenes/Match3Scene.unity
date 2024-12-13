@@ -244,16 +244,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb5f47d760f84e549a965ed4352ebbbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xDim: 8
-  yDim: 8
+  xDim: 9
+  yDim: 9
+  fillTime: 0.1
   gemPrefabs:
   - type: 0
     prefab: {fileID: 8417861311029538609, guid: 54a826577e344cb4e8d03fcb8455847c, type: 3}
   - type: 1
     prefab: {fileID: 4200908606522899943, guid: a6477ad5c2110bb41bccd0afde10ae32, type: 3}
+  - type: 2
+    prefab: {fileID: 1758357074644023368, guid: d5eab39caa298e346aa53f2ebf376f6f, type: 3}
   backgroundPrefab:
   - {fileID: 6335236677832110261, guid: e4a08bbfb700b4140882102dd5450518, type: 3}
-  origin: {x: 0, y: 0, z: 0}
 --- !u!4 &690004581
 Transform:
   m_ObjectHideFlags: 0
