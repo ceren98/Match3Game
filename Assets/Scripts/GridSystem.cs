@@ -33,7 +33,7 @@ namespace Match3Game
 
         private bool inverse = false;
 
-        private Gem pressedGem;
+        public Gem pressedGem;
         private Gem enteredGem;
         private Gem swipedGem;
 
@@ -250,13 +250,47 @@ namespace Match3Game
                 }
                 else
                 {
-                    gems[gem1.X, gem1.Y] = gem1;
-                    gems[gem2.X, gem2.Y] = gem2;
+                    //gems[gem1.X, gem1.Y] = gem1;
+                    //gems[gem2.X, gem2.Y] = gem2;
+
+                    SimulateSwapAndReturn(pressedGem, enteredGem, fillTime);
                 }
 
 
             }
         }
+        public void SimulateSwapAndReturn(Gem gem1, Gem gem2, float fillTime)
+        {
+
+            int gem1X = gem1.X;
+            int gem1Y = gem1.Y;
+            int gem2X = gem2.X;
+            int gem2Y = gem2.Y;
+
+            gem1.MovableComponent.Move(gem2.X, gem2.Y, fillTime);
+            gem2.MovableComponent.Move(gem1X, gem1Y, fillTime);
+
+            gems[gem1.X, gem1.Y] = gem2;
+            gems[gem2.X, gem2.Y] = gem1;
+
+            StartCoroutine(ReturnToOriginalPositionAfterDelay(gem1, gem2, gem1X, gem1Y, gem2X, gem2Y, fillTime));
+        }
+
+        private IEnumerator ReturnToOriginalPositionAfterDelay(Gem gem1, Gem gem2, int gem1X, int gem1Y, int gem2X, int gem2Y, float fillTime)
+        {
+
+            yield return new WaitForSeconds(fillTime);
+
+
+            gem1.MovableComponent.Move(gem1X, gem1Y, fillTime);
+            gem2.MovableComponent.Move(gem2X, gem2Y, fillTime);
+
+
+            gems[gem1X, gem1Y] = gem1;
+            gems[gem2X, gem2Y] = gem2;
+        }
+
+
         #region Click
         public void PressGem(Gem gem)
         {
@@ -275,6 +309,7 @@ namespace Match3Game
             {
                 SwapGems(pressedGem, enteredGem);
             }
+
         }
         #endregion
 
@@ -427,9 +462,9 @@ namespace Match3Game
 
                                 if (x < 0 || x >= xDim) { break; }
 
-                                if (gems[x,verticalGems[i].Y].IsColored() && gems[x,verticalGems[i].Y].ColorComponent.Color == color)
+                                if (gems[x, verticalGems[i].Y].IsColored() && gems[x, verticalGems[i].Y].ColorComponent.Color == color)
                                 {
-                                    horizontalGems.Add(gems[x,verticalGems[i].Y]);
+                                    horizontalGems.Add(gems[x, verticalGems[i].Y]);
                                 }
                                 else { break; }
                             }
