@@ -77,16 +77,16 @@ namespace Match3Game
             }
 
 
-            Destroy(gems[4, 4].gameObject);
+            //Destroy(gems[4, 4].gameObject);
 
-            SpawnNewGem(4, 4, GemType.OBSTACLE);
+            //SpawnNewGem(4, 4, GemType.OBSTACLE);
 
 
-            Destroy(gems[3, 4].gameObject);
-            SpawnNewGem(3, 4, GemType.OBSTACLE);
+            //Destroy(gems[3, 4].gameObject);
+            //SpawnNewGem(3, 4, GemType.OBSTACLE);
 
-            Destroy(gems[5, 6].gameObject);
-            SpawnNewGem(5, 6, GemType.OBSTACLE);
+            //Destroy(gems[5, 6].gameObject);
+            //SpawnNewGem(5, 6, GemType.OBSTACLE);
 
 
 
@@ -97,11 +97,20 @@ namespace Match3Game
 
         public IEnumerator Fill()
         {
-            while (FillStep())
+            bool needsRefill = true;
+            while (needsRefill)
             {
-                inverse = !inverse;
                 yield return new WaitForSeconds(fillTime);
+                while (FillStep())
+                {
+                    inverse = !inverse;
+                    yield return new WaitForSeconds(fillTime);
+                }
+
+                needsRefill = ClearAllValidMatches();
             }
+
+           
         }
 
         public bool FillStep()
@@ -247,6 +256,9 @@ namespace Match3Game
 
                     gem1.MovableComponent.Move(gem2.X, gem2.Y, fillTime);
                     gem2.MovableComponent.Move(gem1X, gem1Y, fillTime);
+
+                    ClearAllValidMatches();
+                    StartCoroutine(Fill());
                 }
                 else
                 {
@@ -495,5 +507,45 @@ namespace Match3Game
         }
 
         #endregion
+
+        public bool ClearAllValidMatches()
+        {
+            bool needsRefill=false;
+
+            for (int y = 0; y < yDim; y++) 
+            {
+                for (int x = 0; x < xDim; x++)
+                {
+                    if (gems[x, y].IsClearable())
+                    {
+                        List<Gem> match = GetMatch(gems[x, y],x,y);
+                        if (match != null)
+                        {
+                            for (int i = 0; i < match.Count; i++) {
+                                if (ClearGem(match[i].X, match[i].Y)) 
+                                { 
+                                    needsRefill = true; 
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+            return needsRefill;
+        }
+
+        public bool ClearGem(int x, int y)
+        {
+            if (gems[x, y].IsClearable() && !gems[x,y].ClearableComponent.IsBeingCleared)
+            {
+                gems[x,y].ClearableComponent.Clear();
+                SpawnNewGem(x,y,GemType.EMPTY);
+
+                return true;
+            }
+
+            return false;
+        }
     }
 }

@@ -57,10 +57,18 @@ namespace Match3Game
         {
             get { return colorComponent; }
         }
+
+        private ClearableGem clearableComponent;
+
+        public ClearableGem ClearableComponent
+        {
+            get { return clearableComponent; }
+        }
         private void Awake()
         {
             movableComponent = GetComponent<MovableGem>();
             colorComponent = GetComponent<ColorGem>();
+            clearableComponent = GetComponent<ClearableGem>();
         }
         public void Init(int _x, int _y, GridSystem _grid, GridSystem.GemType _type)
         {
@@ -79,6 +87,11 @@ namespace Match3Game
         public bool IsColored()
         {
             return colorComponent!=null;
+        }
+
+        public bool IsClearable()
+        {
+            return clearableComponent!=null;
         }
 
         private void OnMouseEnter()
