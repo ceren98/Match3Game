@@ -36,6 +36,7 @@ public class ClearableGem : MonoBehaviour
             yield return new WaitForSeconds(clearAnimation.length);
 
             Destroy(gameObject);
+
         }
     }
 }

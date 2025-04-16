@@ -77,16 +77,16 @@ namespace Match3Game
             }
 
 
-            //Destroy(gems[4, 4].gameObject);
+            Destroy(gems[4, 4].gameObject);
 
-            //SpawnNewGem(4, 4, GemType.OBSTACLE);
+            SpawnNewGem(4, 4, GemType.OBSTACLE);
 
 
-            //Destroy(gems[3, 4].gameObject);
-            //SpawnNewGem(3, 4, GemType.OBSTACLE);
+            Destroy(gems[3, 4].gameObject);
+            SpawnNewGem(3, 4, GemType.OBSTACLE);
 
-            //Destroy(gems[5, 6].gameObject);
-            //SpawnNewGem(5, 6, GemType.OBSTACLE);
+            Destroy(gems[5, 6].gameObject);
+            SpawnNewGem(5, 6, GemType.OBSTACLE);
 
 
 
@@ -216,6 +216,7 @@ namespace Match3Game
                 }
             }
 
+          
 
             return movedGem;
         }
@@ -249,7 +250,8 @@ namespace Match3Game
                 gems[gem1.X, gem1.Y] = gem2;
                 gems[gem2.X, gem2.Y] = gem1;
 
-                if (GetMatch(gem1, gem2.X, gem2.Y) != null || GetMatch(gem2, gem1.X, gem2.Y) != null)
+          
+                if (GetMatch(gem1, gem2.X, gem2.Y) != null || GetMatch(gem2, gem1.X, gem1.Y) != null)
                 {
                     int gem1X = gem1.X;
                     int gem1Y = gem1.Y;
@@ -262,15 +264,11 @@ namespace Match3Game
                 }
                 else
                 {
-                    //gems[gem1.X, gem1.Y] = gem1;
-                    //gems[gem2.X, gem2.Y] = gem2;
-
-                    SimulateSwapAndReturn(pressedGem, enteredGem, fillTime);
+                    SimulateSwapAndReturn(gem1, gem2, fillTime);
                 }
-
-
             }
         }
+
         public void SimulateSwapAndReturn(Gem gem1, Gem gem2, float fillTime)
         {
 
@@ -510,42 +508,45 @@ namespace Match3Game
 
         public bool ClearAllValidMatches()
         {
-            bool needsRefill=false;
+            bool needsRefill = false;
 
-            for (int y = 0; y < yDim; y++) 
+            for (int y = 0; y < yDim; y++)
             {
                 for (int x = 0; x < xDim; x++)
                 {
                     if (gems[x, y].IsClearable())
                     {
-                        List<Gem> match = GetMatch(gems[x, y],x,y);
+                        List<Gem> match = GetMatch(gems[x, y], x, y);
                         if (match != null)
                         {
-                            for (int i = 0; i < match.Count; i++) {
-                                if (ClearGem(match[i].X, match[i].Y)) 
-                                { 
-                                    needsRefill = true; 
-                                }
+                            for (int i = 0; i < match.Count; i++)
+                            {
+                                StartCoroutine(ClearGemRoutine(match[i].X, match[i].Y));
+                                needsRefill = true;
                             }
                         }
-
                     }
                 }
             }
+
             return needsRefill;
         }
 
-        public bool ClearGem(int x, int y)
+
+        private IEnumerator ClearGemRoutine(int x, int y)
         {
-            if (gems[x, y].IsClearable() && !gems[x,y].ClearableComponent.IsBeingCleared)
+            if (gems[x, y].IsClearable() && !gems[x, y].ClearableComponent.IsBeingCleared)
             {
-                gems[x,y].ClearableComponent.Clear();
-                SpawnNewGem(x,y,GemType.EMPTY);
-
-                return true;
+                gems[x, y].ClearableComponent.Clear(); 
+                yield return new WaitForSeconds(fillTime); 
+                SpawnNewGem(x, y, GemType.EMPTY); 
             }
-
-            return false;
         }
+
+
+        
+
+       
+
     }
 }

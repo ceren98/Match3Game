@@ -244,9 +244,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb5f47d760f84e549a965ed4352ebbbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xDim: 9
-  yDim: 9
-  fillTime: 0.1
+  xDim: 8
+  yDim: 8
+  fillTime: 0.2
   gemPrefabs:
   - type: 0
     prefab: {fileID: 8417861311029538609, guid: 54a826577e344cb4e8d03fcb8455847c, type: 3}
